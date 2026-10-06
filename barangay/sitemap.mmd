@@ -1,0 +1,60 @@
+flowchart LR
+    classDef public fill:#eef7fb,stroke:#2e9bc1,color:#17365d,stroke-width:1px
+    classDef resident fill:#eaf8f4,stroke:#45b59e,color:#164d45,stroke-width:1px
+    classDef staff fill:#fff5e6,stroke:#d99135,color:#6a4315,stroke-width:1px
+    classDef security fill:#f2efff,stroke:#7a63c7,color:#3d2d73,stroke-width:1px
+    classDef governance fill:#f4f6f8,stroke:#8795a8,color:#344257,stroke-width:1px
+
+    A[Barangay Information System]:::public
+
+    A --> P[Public / Access]
+    P --> setup[setup.php<br/>First-run administrator setup]:::public
+    P --> login[login.php<br/>Username + password]:::security
+    login --> otp[verify_otp.php<br/>Gmail six-digit OTP]:::security
+    otp --> logout[logout.php]:::security
+
+    otp --> R[Resident Portal]
+    R --> portal[resident_portal.php]:::resident
+    portal --> docs[Documents tab<br/>Request and track documents]:::resident
+    portal --> issue[Report an issue tab<br/>Incident, blotter, road, outage, etc.]:::resident
+    portal --> feedback[Feedback tab<br/>Submit and view feedback]:::resident
+    portal --> announcements[Announcements tab<br/>Latest barangay updates]:::resident
+    R --> residentAccounts[resident_accounts.php<br/>Account expiration and move-out]:::resident
+
+    otp --> S[Official Staff / Admin Portal]
+    S --> dashboard[index.php<br/>Dashboard]:::staff
+    S --> residents[residents.php<br/>Resident directory]:::staff
+    S --> documents[documents.php<br/>Document issuance queue]:::staff
+    documents --> print[print_document.php?id=...<br/>Printable request copy]:::staff
+    S --> blotters[blotters.php<br/>Blotter and issue records]:::staff
+    S --> feedbackReview[feedback.php<br/>Review resident feedback]:::staff
+    S --> reports[reports.php<br/>Charts and analytics]:::staff
+    reports --> exports[report_export.php<br/>PDF / CSV / Word]:::staff
+    S --> announcementsAdmin[announcements.php<br/>Publish announcements]:::staff
+
+    S --> G[Governance / Maintenance]
+    G --> retention[retention.php<br/>Archive-only retention policy]:::governance
+    retention --> protected[Residents and staff are never deleted<br/>Expired accounts may be marked Archived]:::governance
+    G --> backup[backup.php<br/>Local SQL backup and history]:::governance
+
+    S --> notifications[PHPMailer + Gmail SMTP<br/>OTP and service notifications]:::security
+    notifications --> mailConfig[config/mail.php<br/>Gmail settings]:::security
+    notifications --> mailHelper[includes/mailer.php<br/>PHPMailer helper]:::security
+
+    docs -. request status .-> portal
+    issue -. case status .-> blotters
+    feedback -. review .-> feedbackReview
+    announcementsAdmin -. published updates .-> announcements
+    documents -. issued document email .-> notifications
+    portal -. request/report email .-> notifications
+
+    S --> staff[staff_accounts.php<br/>Staff roles and account control]:::staff
+    S --> audit[audit.php<br/>Protected activity log]:::governance
+    S --> privacyAdmin[privacy_admin.php<br/>Review privacy requests]:::governance
+    R --> privacy[privacy.php<br/>Access and correction requests]:::resident
+    R --> notifications[notifications.php<br/>In-app notifications]:::resident
+    S --> staffNotifications[notifications.php<br/>In-app notifications]:::staff
+    issue --> attachments[Validated JPG / PNG / PDF attachments]:::resident
+    docs --> official[issue_document.php<br/>Type-specific official certificate]:::staff
+    official --> verify[verify.php<br/>Public document verification / QR URL]:::public
+    G --> encrypted[Encrypted backup download<br/>backup.php + backup_cron.php]:::governance
